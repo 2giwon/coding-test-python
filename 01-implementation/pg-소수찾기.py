@@ -35,6 +35,6 @@ if __name__ == "__main__":
     # print로 감싸야 결과가 보인다 (solution만 호출하면 반환값이 버려짐)
     print(solution("17"))  # 3 (7, 17, 71)
     print(solution("011"))  # 2 (11, 101)
-    print(solution("010"))  # 2 ("011"과 같은 재료)
-    print(solution("100"))  # 0 (1, 10, 100, 세 자리 조합 모두 소수 아님)
-    print(solution("175"))  # 12
+    print(solution("010"))  # 0 — 1이 하나뿐이라 11/101 불가, {0,1,10,100} 전부 소수 아님
+    print(solution("100"))  # 0 ("010"과 같은 재료)
+    print(solution("175"))  # 7 (5, 7, 17, 71, 157, 571, 751)
