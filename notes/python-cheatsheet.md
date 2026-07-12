@@ -101,6 +101,65 @@ tuple(sorted(pair))              # 무방향 간선 (a,b)==(b,a) → 정렬 튜�
 > 출처: pg-최소직사각형 오답 — 회전 판단을 조건문으로 하려다 확장 시점 한 곳을 놓침
 > (반례 `[[60,50],[30,70]]` → 4200 ≠ 3500). 정규화했으면 분기 자체가 없었다.
 
+## 사고 패턴: "모든 경우의 수"가 보이면 itertools 반사
+
+직접 만들지 말 것. 손 구현하다 시간 초과가 소수 찾기(42839)의 실패 원인이었다.
+
+```python
+from itertools import permutations, combinations, product
+
+permutations("175", 2)   # 순서 있음: 17, 71, 15, 51, 75, 57 (2자리 배열)
+combinations([1,2,3], 2) # 순서 없음: (1,2), (1,3), (2,3) (짝 뽑기)
+product([0,1], repeat=3) # 중복 허용 전체 조합: 000, 001, ... 111 (2^3)
+```
+
+- 고르는 것에 **순서가 의미 있으면** permutations, **없으면** combinations
+- 만든 결과의 중복 제거는 `set`으로 (예: "011" → int 변환하면 같은 수가 여러 번)
+
+## 부품: 소수 판별 (√n까지만)
+
+**약수는 짝으로 다니고, 짝의 작은 쪽은 √n을 못 넘는다** (둘 다 √n보다 크면 곱이 n을
+초과). 그래서 √n까지 뒤져서 없으면 그 위에도 없다. 9,999,999도 3,162번이면 끝.
+
+```python
+def is_prime(n):
+    if n < 2:                              # 0, 1은 소수 아님 (이 가드 필수!)
+        return False
+    for d in range(2, int(n**0.5) + 1):    # n**0.5 = √n, range라 +1
+        if n % d == 0:
+            return False
+    return True
+```
+
+- 함정: 확인은 **2부터** (1로 나누면 모든 수가 걸러짐), `n < 2` 가드 누락
+
+## 사고 패턴: 재귀 = "계약으로 읽기" (완전탐색/DFS/백트래킹의 뼈대)
+
+머리로 호출을 펼치지 말 것. 함수 = 계약("이 상태에서 나머지를 전부 처리해준다")으로
+읽고, 지금 층의 로직만 확인한다. 구조는 항상 3요소:
+
+```python
+def explore(remaining, current):
+    if current:                              # ① 현재 상태 처리 (등록/판정)
+        candidates.add(int(current))
+    for i in range(len(remaining)):          # ② 가능한 선택지 순회
+        rest = remaining[:i] + remaining[i+1:]   # i번째만 뺀 나머지 (새 문자열)
+        explore(rest, current + remaining[i])    # ③ 작아진 문제는 재귀에 위임
+    # 종료 조건: remaining이 ""이면 for가 0바퀴 → 자연 종료 (암묵적 base case)
+```
+
+- **선택 → 재귀 → 복귀(다음 선택)** — 이 복귀가 곧 백트래킹
+- 문자열/튜플은 불변이라 새로 만들어 넘기면 **상태 복원 코드가 필요 없음**
+  (공유 리스트를 쓰면 `append → 재귀 → pop`으로 직접 복원 — W13에서)
+- 이해 안 되면 `depth` 파라미터 + 들여쓰기 print로 **컴퓨터한테 펼치게** 한다:
+
+```python
+def explore(remaining, current, depth=0):
+    print("    " * depth + f"({remaining!r}, {current!r})")
+    ...
+    explore(rest, current + picked, depth + 1)
+```
+
 ## 함정 목록 (당한 것 추가)
 
 - `[[0]*m]*n` — 행이 전부 같은 객체 (얕은 복사)
