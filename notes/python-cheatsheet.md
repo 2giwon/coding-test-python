@@ -115,6 +115,16 @@ product([0,1], repeat=3) # 중복 허용 전체 조합: 000, 001, ... 111 (2^3)
 
 - 고르는 것에 **순서가 의미 있으면** permutations, **없으면** combinations
 - 만든 결과의 중복 제거는 `set`으로 (예: "011" → int 변환하면 같은 수가 여러 번)
+- **조립 라인 암기: "뽑고 → 붙이고 → 숫자로 → 담고 → 세기"** (07/13 재현 때 막힌 지점)
+
+```python
+candidates = set()
+for k in range(1, len(numbers) + 1):
+    for p in permutations(numbers, k):   # 뽑고 — 결과는 튜플 ('7','1')!
+        candidates.add(int("".join(p)))  # 붙이고(join) → 숫자로(int) → 담고(set)
+count = sum(1 for n in candidates if is_prime(n))  # 세기
+# 함정: permutations는 문자열이 아니라 "튜플"을 준다 → "".join()이 다리 (Kotlin joinToString)
+```
 
 ## 부품: 소수 판별 (√n까지만)
 
