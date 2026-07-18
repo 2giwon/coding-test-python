@@ -4,7 +4,8 @@
 #       ranks[rankIndex] 교차 인덱스 대입으로 IndexError (반례 [3,3,2]).
 #       교훈: ① 최댓값 기준 선발은 "집계 먼저, 수집은 2-pass"
 #            ② 불안한 분기는 그 분기를 때리는 입력으로 제출 전 로컬 확인 (30초 룰)
-#       [재풀이: 07/18]
+#       [재풀이 07/18 성공 — 안 보고 재현(newSolution), 제출 통과. 채점(enumerate)과
+#        2-pass(집계 먼저) 모두 자력 재현, 과거 오답 반례 4개 전부 통과. 디버그 print 없음 ✅]
 def solution(answers):
     # 세 수포자의 찍기 패턴을 하나의 리스트로 묶는다 (코드 3벌 복사 방지)
     patterns = [
@@ -30,6 +31,30 @@ def solution(answers):
     for i, score in enumerate(scores):
         if score == best:
             ranks.append(i + 1)  # 수포자 번호는 1부터라 +1
+
+    return ranks
+
+
+def newSolution(answers):
+    first = [1, 2, 3, 4, 5]
+    second = [2, 1, 2, 3, 2, 4, 2, 5]
+    third = [3, 3, 1, 1, 2, 2, 4, 4, 5, 5]
+
+    counts = [0, 0, 0]
+
+    for idx, answer in enumerate(answers):
+        if answer == first[idx % len(first)]:
+            counts[0] += 1
+        if answer == second[idx % len(second)]:
+            counts[1] += 1
+        if answer == third[idx % len(third)]:
+            counts[2] += 1
+
+    maxCount = max(counts)
+    ranks = []
+    for idx, count in enumerate(counts):
+        if maxCount == count:
+            ranks.append(idx + 1)
 
     return ranks
 
