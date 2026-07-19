@@ -5,7 +5,8 @@
 #       07/13 재현 제출: 문자열인 채 set에 담아 "11"과 "011"이 따로 카운트되는 오답
 #       (공식 예제 "011"→3≠2). 교훈②: 중복 제거는 정규화(int) "후에" — set에 뭘 담는지가 관건.
 #       수정 재제출 통과. 재귀(백트래킹) 버전은 git 이력과 치트시트 참조.
-#       [재풀이: 07/20 — 조립 라인 안 보고 재현이 과녁]
+#       [재풀이 07/19 성공 — 안 보고 재현(newSolution), 제출 통과. 조립 라인 + int 정규화
+#        타이밍 + √n/n<2 가드 전부 자력 재현, 과거 반례 5개 통과]
 from itertools import permutations
 
 
@@ -31,6 +32,33 @@ def solution(numbers):
     count = 0
     for case in cases:
         if is_prime(case):
+            count += 1
+
+    return count
+
+
+def isPrime(number):
+    if number < 2:
+        return False
+
+    for n in range(2, int(number**0.5) + 1):
+        if number % n == 0:
+            return False
+
+    return True
+
+
+def newSolution(numbers):
+    cases = set()
+
+    for i in range(1, len(numbers) + 1):
+        for p in permutations(numbers, i):
+            number = int("".join(p))
+            cases.add(number)
+
+    count = 0
+    for case in cases:
+        if isPrime(case):
             count += 1
 
     return count
