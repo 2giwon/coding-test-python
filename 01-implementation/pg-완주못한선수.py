@@ -7,8 +7,6 @@
 #       해결: Counter(개수 multiset) 또는 정렬 후 비교. 대안 dict 직접 카운팅 O(n).
 #       교훈: ①"존재냐 개수냐" 먼저 판단 → 자료구조 결정 ②반례는 제약과 대조하고 만든다
 #       (participant≥1, completion=participant-1 → 빈 completion은 경계값). [재풀이: 07/28]
-
-
 def solution(participant, completion):
     participant.sort()
     completion.sort()
