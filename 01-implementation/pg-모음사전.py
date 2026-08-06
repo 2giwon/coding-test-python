@@ -9,7 +9,10 @@
 #   ①② 자력 재현 통과. 다만 product는 손이 기억 못 해 살짝 봄 → 근본은 재귀(별도 학습 필수).
 #   ③ 가중치 점화식(앞×5+1) 자력 유도 성공.
 #   교훈: "계산 가능한 규모면 나열하라"(①) vs "규모 크면 수식으로 건너뛰라"(③) — 둘 다 무기.
-#         가변 깊이 완전탐색의 근본은 재귀(notes/recursion.md). [재재풀이: 07/28 — 재귀로]
+#         가변 깊이 완전탐색의 근본은 재귀(notes/recursion.md).
+#   [재재풀이 08/05 — 재귀(newSolution3): 부분 성공. recursion.md 힌트 참조(자력 ~20%).
+#    단, ""를 dic[0]에 포함해 +1 제거하는 오프셋 변형은 자기 사고. 판정: 사다리 2~4 완주 후
+#    재도전 → 재재재풀이: 08/12 완전 백지에서]
 from itertools import product
 
 
@@ -50,9 +53,24 @@ def newSolution2(word):
     return answer
 
 
+def newSolution3(word):
+    """② 재귀 — 재풀이(08/05) 자력 버전. 빈 문자열을 dic[0]에 포함시켜 +1 없이 index가 곧 순번."""
+    dic = []
+
+    def dfs(current):
+        if len(current) > 5:
+            return
+        dic.append(current)
+        for ch in "AEIOU":
+            dfs(current + ch)
+
+    dfs("")
+    return dic.index(word)
+
+
 if __name__ == "__main__":
     cases = {"A": 1, "AAAAA": 5, "AAAAE": 6, "AAAE": 10, "I": 1563, "EIO": 1189}
-    for fn in (solution, newSolution, newSolution2):
+    for fn in (solution, newSolution, newSolution2, newSolution3):
         for word, expected in cases.items():
             assert fn(word) == expected, f"{fn.__name__}({word})={fn(word)} != {expected}"
     print("all passed")

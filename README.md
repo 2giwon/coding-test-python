@@ -7,6 +7,7 @@
 ## 구조
 
 ```
+00-recursion-ladder/ 재귀 체득 연습 (notes/recursion.md 사다리)
 01-implementation/   구현·완전탐색
 02-string/           문자열·정규식
 03-hash/             해시
