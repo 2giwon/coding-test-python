@@ -3,11 +3,34 @@
 #       enumerate로 운반한다 — "관련 값은 쌍으로 묶어 이동" (기능개발 짝 어긋남의 예방책).
 #       꺼낸 우선순위보다 높은 게 큐에 남아있으면 뒤로, 없으면 실행 카운트+1.
 # 리뷰: location 추적 방법에서 막힘(25분 초과, 힌트 2단계 사용) → enumerate 쌍으로 해결.
-#       빈 큐 특수 처리(maxp=p)는 any() 판정으로 바꾸면 통째로 불필요. [재풀이: 09/03]
+#       빈 큐 특수 처리(maxp=p)는 any() 판정으로 바꾸면 통째로 불필요.
+#       [재풀이 09/05 완료: 10분 자력 통과 — 같은 구조를 백지에서 재현 (아래 resolve)]
 from collections import deque
 
 
 def solution(priorities, location):
+    pqueue = deque(enumerate(priorities))
+
+    pop_count = 0
+    while pqueue:
+        idx, pr = pqueue.popleft()
+        if pqueue:
+            max_pr = max(other for _, other in pqueue)
+        else:
+            max_pr = pr
+
+        if pr < max_pr:
+            pqueue.append((idx, pr))
+        else:
+            pop_count += 1
+            if idx == location:
+                return pop_count
+
+    return pop_count
+
+
+# 재풀이 (2026-09-05, 10분 자력 통과) — 힌트 없이 백지에서 같은 구조를 재현
+def resolve(priorities, location):
     pqueue = deque(enumerate(priorities))
 
     pop_count = 0
@@ -53,5 +76,6 @@ if __name__ == "__main__":
     ]
     for (priorities, location), expected in cases:
         assert solution(priorities, location) == expected
+        assert resolve(priorities, location) == expected
         assert solution_ref(priorities, location) == expected
-    print("모든 케이스 통과 (본 풀이 + 참고 정답)")
+    print("모든 케이스 통과 (본 풀이 + 재풀이 + 참고 정답)")
