@@ -71,6 +71,35 @@ def solution_ref(maps):
     return dist[n - 1][m - 1] or -1  # 0(미도달)이면 -1
 
 
+def new_solution(maps):
+    n = len(maps)
+    m = len(maps[0])
+    visit_queue = deque()
+
+    dist = [[0] * m for _ in range(n)]
+    dist[0][0] = 1
+
+    visit_queue.append([0, 0])
+
+    dr = [1, -1, 0, 0]
+    dc = [0, 0, 1, -1]
+
+    while visit_queue:
+        r, c = visit_queue.popleft()
+
+        for i in range(4):
+            nr, nc = r + dr[i], c + dc[i]
+            if nr < 0 or nc < 0 or nr >= n or nc >= m:
+                continue
+            if maps[nr][nc] == 0 or dist[nr][nc] > 0:
+                continue
+
+            dist[nr][nc] = dist[r][c] + 1
+            visit_queue.append((nr, nc))
+
+    return dist[n - 1][m - 1] or -1
+
+
 if __name__ == "__main__":
     cases = [
         (
