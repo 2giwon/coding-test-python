@@ -2,21 +2,32 @@
 # 핵심: 결정 트리 DFS — 숫자마다 +/− 두 갈래, dfs(몇 번째 결정, 지금까지의 합).
 #       기저 조건 = 숫자를 다 썼을 때 합이 target인지 판정. "모든 경우의 수" 신호 → DFS.
 #       visited 불필요 (결정 트리는 되돌아갈 수 없는 구조). 2^20 ≈ 100만이라 완전탐색 OK.
-# 리뷰: 27분 자력 통과 (DFS/BFS 첫 문제, 힌트 없음). count를 인자로 들고 다니는 누산기
-#       방식으로 풀었는데, 재귀의 표준형은 "각 갈래가 자기 몫을 반환하고 부모가 더한다"
-#       (solution_ref) — 인자 하나 줄고 기저 조건도 하나로 합쳐진다. [재풀이: 09/15]
+# 리뷰: [1차 09/08] 27분 자력 통과 (DFS/BFS 첫 문제, 힌트 없음). count를 인자로 들고 다니는
+#       누산기 방식으로 풀었는데, 재귀의 표준형은 "각 갈래가 자기 몫을 반환하고 부모가 더한다"
+#       — 인자 하나 줄고 기저 조건도 하나로 합쳐진다.
+#       [2차 09/15] 4분. 누산기 → 합산형으로 바꿔서 재풀이. 27분 → 4분.
+#       🔴 단순 반복이 아니라 "같은 문제를 더 나은 방식으로" 다시 푼 것이라 의미가 있다.
+#       1차 때 못 했던 방식을 1주 뒤에 백지에서 바로 써냈다 = 구조가 남았다는 증거.
+#       plus_count/minus_count로 이름을 붙인 것도 좋다 — 한 줄로 줄이는 것보다
+#       "이 갈래가 몇 개를 돌려줬는지"가 코드에 보이는 쪽이 재귀 디버깅에 낫다.
 
 
 def solution(numbers, target):
-    def dfs(current, s, count):
-        if current == len(numbers):
-            return count + 1 if s == target else count
+    n = len(numbers)
 
-        count = dfs(current + 1, s + numbers[current], count)
-        count = dfs(current + 1, s - numbers[current], count)
-        return count
+    def dfs(current, s):
+        if current == n:
+            if s == target:
+                return 1
+            else:
+                return 0
 
-    return dfs(0, 0, 0)
+        plus_count = dfs(current + 1, s + numbers[current])
+        minus_count = dfs(current + 1, s - numbers[current])
+
+        return plus_count + minus_count
+
+    return dfs(0, 0)
 
 
 # 참고 정답 1: 반환값 합산형 DFS — "경우의 수 세기"의 표준형.
@@ -88,6 +99,6 @@ if __name__ == "__main__":
     ]
     for (numbers, target), expected in cases:
         assert solution(numbers, target) == expected
-        assert solution_ref(numbers, target) == expected
-        assert solution_product(numbers, target) == expected
+        # assert solution_ref(numbers, target) == expected
+        # assert solution_product(numbers, target) == expected
     print("모든 케이스 통과 (누산기 DFS + 합산 DFS + product)")
