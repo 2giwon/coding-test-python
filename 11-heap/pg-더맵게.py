@@ -79,59 +79,46 @@ import heapq
 
 
 # ─────────────────────────────────────────────────────────────────────
-# ① 2026-10-13 제출본 (이기원) — 프로그래머스 ✅ 통과, 20분
-#    🔴 단, [0, 0, 5] K=1 에서 -1 을 반환한다(정답 2). 아래 ③ 참고
+# 최종 풀이 — 10/13 제출본을 10/15 에 직접 수정한 것
+#
+#   멈추는 조건이 딱 2개뿐이고, 둘 다 while 머리와 그 바로 아래에 모여 있다:
+#     성공 = 가장 안 매운 것이 이미 K 이상  → while 조건이 거짓
+#     실패 = 섞을 상대가 없다               → len(h) < 2
+#
+#   🔴 10/15 에 고친 것 3가지 (10/13 제출본과의 차이)
+#     ① `if smallest == 0 and second == 0: return -1` 두 줄 삭제
+#        → 이 줄이 [0,0,5] K=1 에서 -1 을 만들었다(정답 2). 아래 테스트 뒤 4개가 그 반례.
+#          "0끼리 섞으면 영원히 0"이 걱정이었는데, 섞을 때마다 길이가 1 줄어드니
+#          무한루프는 구조적으로 불가능하다. [0,0,0,0] 도 이 줄 없이 -1 이 된다.
+#     ② `len(...) == 0` 검사를 꺼낸 뒤 → **꺼내기 전** `len(h) < 2` 로 옮김
+#        → 둘 다 맞는 코드지만, 지금 형태가 "섞을 상대가 둘 이상인가"라는 질문 그대로다
+#     ③ `h = list(scoville)` 복사 추가
+#        → heapify 는 원본을 제자리에서 바꾼다. 복사 없이 같은 입력으로 두 번
+#          테스트하면 두 번째 결과가 달라진다(제출용으로는 무관, 테스트에서는 걸린다)
+#
+#   출구가 늘어나면 틀릴 자리도 늘어난다 — 이번 문제에서 가져갈 가장 쓸모 있는 것.
 # ─────────────────────────────────────────────────────────────────────
 def solution(scoville, K):
-    heapq.heapify(scoville)
+    h = list(scoville)  # 원본을 건드리지 않는다
+    heapq.heapify(h)
 
     answer = 0
-    while scoville and scoville[0] < K:
-        smallest = heapq.heappop(scoville)
-        if len(scoville) == 0:
+    while h and h[0] < K:  # 가장 안 매운 것이 K 이상이면 전부 K 이상이다
+        if len(h) < 2:  # 섞을 상대가 없다 → 더 못 한다
             return -1
 
-        second = heapq.heappop(scoville)
-        if smallest == 0 and second == 0:  # 🔴 이 두 줄이 반례를 만든다
-            return -1
+        smallest = heapq.heappop(h)
+        second = heapq.heappop(h)
         result = smallest + second * 2
 
-        heapq.heappush(scoville, result)
+        heapq.heappush(h, result)
         answer += 1
 
     return answer
 
 
-# ─────────────────────────────────────────────────────────────────────
-# ② 기준 풀이 — ①에서 "둘 다 0이면 -1" 두 줄을 뺀 것이 전부다
-#
-#    왜 그 두 줄이 없어도 되는가:
-#      한 번 섞을 때마다 2개를 꺼내고 1개를 넣는다 → 길이가 반드시 1 줄어든다.
-#      그러니 최대 n-1회면 1개가 되고, 아래 `len(h) < 2` 검사에 걸려 멈춘다.
-#      무한루프는 구조적으로 불가능하다.
-#
-#    멈추는 조건이 딱 2개뿐이고, 둘 다 while 머리와 그 바로 아래에 모여 있다:
-#      성공 = 가장 작은 값이 이미 K 이상   → while 조건이 거짓
-#      실패 = 섞을 상대가 없다             → len(h) < 2
-# ─────────────────────────────────────────────────────────────────────
-def solution_ref(scoville, K):
-    h = list(scoville)  # 원본을 건드리지 않는다
-    heapq.heapify(h)
-
-    count = 0
-    while h[0] < K:  # 가장 안 매운 것이 K 이상이면 전부 K 이상이다
-        if len(h) < 2:  # 섞을 상대가 없다 → 더 못 한다
-            return -1
-        smallest = heapq.heappop(h)
-        second = heapq.heappop(h)
-        heapq.heappush(h, smallest + second * 2)
-        count += 1
-
-    return count
-
-
 if __name__ == "__main__":
-    # 앞 8개 = 처음 만든 케이스 / 뒤 4개 = ①의 반례 (10/13 추가)
+    # 앞 8개 = 처음 만든 케이스 / 뒤 4개 = 10/13 제출본의 반례 (10/13 추가)
     cases = [
         (([1, 2, 3, 9, 10, 12], 7), 2),  # 공식 예제
         (([10, 20], 5), 0),  # 이미 전부 K 이상 — 한 번도 안 섞음
@@ -148,20 +135,10 @@ if __name__ == "__main__":
         (([0, 0, 3, 4], 10), 3),
     ]
 
-    print("=== ② 기준 풀이 ===")
     for (scoville, K), expected in cases:
-        got = solution_ref(list(scoville), K)
+        got = solution(scoville, K)
         assert got == expected, f"scoville={scoville} K={K}  기대={expected}  실제={got}"
-    print(f"{len(cases)}개 전부 통과")
-
-    print("\n=== ① 10/13 제출본 — 어디서 갈리는지 보기 ===")
-    failed = 0
-    for (scoville, K), expected in cases:
-        got = solution(list(scoville), K)
-        if got != expected:
-            failed += 1
-            print(f"  ❌ {str(scoville):20} K={K:<4} 기대={expected:<4} 실제={got}")
-    print(f"{len(cases)}개 중 {failed}개 불일치 — 전부 0 이 두 개 이상 섞인 입력이다")
+    print(f"모든 케이스 통과 ({len(cases)}개 — 뒤 4개는 10/13 제출본이 틀렸던 반례)")
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -191,6 +168,10 @@ if __name__ == "__main__":
 #                 ④ -1 검사는 "꺼낸 다음"에 길이를 보는 위치가 맞다 ← 이건 처음부터 맞게 썼다
 #
 #   ■ 반복 교훈 (career-transition/README.md W2~W6 에 이미 적어둔 것)
-#     "채점 통과 ≠ 정답". 오늘이 그 사례다.
+#     "채점 통과 ≠ 정답". 10/13 이 그 사례다.
 #     증상을 보고 특수 케이스를 심어 막으면, 심은 그 조건이 새 버그가 된다.
+#
+#   ■ 10/15 후속 — 반례 4개를 보고 직접 고쳤다. 12개 전부 통과
+#     고친 내용 3가지는 위 함수 주석에 적어 둠. 지적받은 ①만 고친 게 아니라
+#     ②(검사 위치)·③(원본 복사)까지 함께 가져갔다.
 # ─────────────────────────────────────────────────────────────────────
